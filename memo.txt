@@ -1,2 +1,6 @@
 cd C:\Users\82104\Desktop\Study\git-blog\khj5877.github.io
-bundle exec jekyll serve
+bundle exec jekyll serve --livereload
+
+
+버튼
+https://mmistakes.github.io/minimal-mistakes/docs/utility-classes/#buttons
