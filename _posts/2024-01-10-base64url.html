@@ -1,0 +1,140 @@
+---
+layout: single
+title:  "Base64 이미지 보기"
+future : true
+published : true
+categories: coding
+tag: [Base64, Base64 이미지, Base64 이미지 변환,Base64 이미지 뷰어, java]
+
+sidebar:
+nav: "docs"
+---
+
+
+<html lang="en">
+<head>
+  <title>Base64 이미지 뷰어</title>
+  <style>
+    #base64Input {
+      width: 100%;
+      height: 150px; /* 높이 조정 */
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f8f8f8; /* 배경색 추가 */
+      color: black ;
+    }
+    #imageDisplayContainer {
+      width: 100%;
+      min-height: 200px; /* 최소 높이 설정 */
+      border: 1px dashed #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      background-color: #f0f0f0; /* 배경색 추가 */
+      color: black ;
+    }
+    #imageDisplay {
+      max-width: 100%;
+      max-height: 200px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<textarea id="base64Input" placeholder="Base64 인코딩된 이미지를 입력하세요"></textarea><br>
+<button onclick="showImage()">보기</button>
+<br>
+<div id="imageDisplayContainer">
+  <img id="imageDisplay" />
+  <span id="placeholderText">이미지가 여기에 표시됩니다.</span>
+</div>
+
+<script>
+  function getImageType(base64Data) {
+    if (base64Data.startsWith('iVBOR')) {
+      return 'data:image/png;base64,';
+    } else if (base64Data.startsWith('R0lGOD')) {
+      return 'data:image/gif;base64,';
+    } else if (base64Data.startsWith('/9j/')) {
+      return 'data:image/jpeg;base64,';
+    } else {
+      // 기본적으로 JPEG를 사용하거나 오류를 반환할 수 있습니다.
+      return 'data:image/jpeg;base64,';
+    }
+  }
+
+  function transformBase64UrlToBase64(inputString) {
+    // MIME 타입 접두어 분리
+    var mimePrefixMatch = inputString.match(/^data:image\/[a-zA-Z]+;base64,/);
+    var mimePrefix = '';
+    if (mimePrefixMatch) {
+      mimePrefix = mimePrefixMatch[0];
+      inputString = inputString.substring(mimePrefix.length);
+    }
+
+    // Base64URL에서 Base64로 변환
+    var base64 = base64UrlToBase64(inputString);
+
+    // 변환된 데이터와 접두어 결합
+    return mimePrefix + base64;
+  }
+
+  function base64UrlToBase64(base64Url) {
+    // Base64URL에서 Base64로 변환
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    // 패딩 추가
+    while (base64.length % 4) {
+      base64 += '=';
+    }
+    return base64;
+  }
+
+
+
+  function isValidBase64(base64String) {
+    // MIME 타입 접두어를 찾고 제거
+    var mimePrefixMatch = base64String.match(/^data:image\/[a-zA-Z]+;base64,/);
+    if (mimePrefixMatch) {
+      base64String = base64String.substring(mimePrefixMatch[0].length);
+    }
+
+    // Base64 패턴 검사
+    var regex = /^(?:[A-Za-z0-9+\/]{4})*?(?:[A-Za-z0-9+\/]{2}(?:==)?|[A-Za-z0-9+\/]{3}=?)?$/;
+    return regex.test(base64String);
+  }
+
+
+  function showImage() {
+    var base64Text = document.getElementById('base64Input').value;
+    if (base64Text) {
+      // Base64URL을 Base64로 변환
+      var base64Converted = transformBase64UrlToBase64(base64Text);
+
+      // 유효성 검사
+      // if (!isValidBase64(base64Converted)) {
+      //   alert('유효하지 않은 Base64 텍스트입니다.');
+      //   return;
+      // }
+
+      // 이미지 타입 추론 및 접두어 추가
+      var imagePrefix = getImageType(base64Converted);
+      if (!base64Converted.startsWith('data:image')) {
+        base64Converted = imagePrefix + base64Converted;
+      }
+      console.log(base64Converted)
+
+      document.getElementById('placeholderText').style.display = 'none';
+      // 이미지 표시
+      var image = document.getElementById('imageDisplay');
+      image.src = base64Converted;
+      image.style.display = 'block';
+    }
+  }
+
+
+</script>
+</body>
+</html>
